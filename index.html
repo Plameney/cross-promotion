@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOKOLOV — Кросс-промо: Продажи без отговорок</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #1B4E9B;
+    --blue-dark: #153d7a;
+    --blue-mid: #2260b8;
+    --blue-light: #4a80cc;
+    --gold: #C9A84C;
+    --gold-light: #e8c96a;
+    --white: #ffffff;
+    --light: #f4f7fc;
+    --gray: #6b7a95;
+    --accent: #E8445A;
+    --green: #27ae60;
+    --orange: #e67e22;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+    background: #0d2655;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .progress-bar {
+    position: fixed; top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    transition: width 0.4s ease;
+    z-index: 100;
+  }
+  .dot-nav {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 7px; z-index: 100;
+  }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    cursor: pointer; transition: all 0.3s;
+  }
+  .dot.active { background: var(--gold); transform: scale(1.3); }
+  .nav-arrows {
+    position: fixed; bottom: 16px; right: 20px;
+    display: flex; gap: 8px; z-index: 100;
+  }
+  .arrow-btn {
+    width: 42px; height: 42px; border-radius: 50%;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; transition: all 0.2s;
+  }
+  .arrow-prev { background: rgba(255,255,255,0.15); color: white; }
+  .arrow-next { background: var(--gold); color: white; }
+  .arrow-btn:hover { transform: scale(1.1); }
+  .arrow-btn:disabled { opacity: 0.3; cursor: default; transform: none; }
+  .slide-counter {
+    position: fixed; top: 14px; right: 18px;
+    font-family: 'Inter', sans-serif; font-size: 12px;
+    color: rgba(255,255,255,0.5); z-index: 100; letter-spacing: 0.5px;
+  }
+  .sokolov-logo {
+    position: fixed; top: 14px; left: 18px;
+    font-family: 'Montserrat', sans-serif; font-weight: 800;
+    font-size: 15px; color: rgba(255,255,255,0.8);
+    letter-spacing: 2px; z-index: 100;
+  }
+  .slides-wrapper {
+    position: relative; width: 100%; height: 100%;
+  }
+  .slide {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; flex-direction: column;
+    opacity: 0; transform: translateX(60px);
+    transition: all 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    overflow-y: auto;
+    padding: 58px 22px 76px;
+  }
+  .slide.active { opacity: 1; transform: translateX(0); pointer-events: all; }
+  .slide.exit { opacity: 0; transform: translateX(-60px); }
+
+  /* COVER */
+  .slide-cover {
+    background: linear-gradient(160deg, #0d2655 0%, #1B4E9B 50%, #0d3580 100%);
+    justify-content: flex-end; padding-bottom: 90px;
+  }
+  .slide-cover::before {
+    content: 'S'; position: fixed; top: -40px; right: -40px;
+    font-family: 'Montserrat', sans-serif; font-weight: 900;
+    font-size: 340px; color: rgba(255,255,255,0.04);
+    line-height: 1; pointer-events: none;
+  }
+  .cover-tag {
+    display: inline-block; background: var(--gold); color: #0d2655;
+    font-family: 'Montserrat', sans-serif; font-weight: 700;
+    font-size: 11px; letter-spacing: 2px; padding: 5px 12px;
+    border-radius: 20px; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .cover-title {
+    font-family: 'Montserrat', sans-serif; font-weight: 900;
+    font-size: 36px; line-height: 1.1; color: white; margin-bottom: 16px;
+  }
+  .cover-title span { color: var(--gold); }
+  .cover-sub { font-size: 15px; color: rgba(255,255,255,0.7); line-height: 1.5; }
+  .cover-accent-line { width: 50px; height: 4px; background: var(--gold); border-radius: 2px; margin-bottom: 20px; }
+
+  /* DIVIDER */
+  .slide-divider {
+    background: linear-gradient(145deg, #1B4E9B 0%, #0d2655 100%);
+    justify-content: center; align-items: center;
+    text-align: center; padding: 58px 30px 90px;
+  }
+  .divider-num {
+    font-family: 'Montserrat', sans-serif; font-weight: 900;
+    font-size: 80px; color: rgba(255,255,255,0.06); line-height: 1; margin-bottom: -20px;
+  }
+  .divider-title {
+    font-family: 'Montserrat', sans-serif; font-weight: 800;
+    font-size: 28px; color: white; line-height: 1.2; margin-bottom: 14px;
+  }
+  .divider-title span { color: var(--gold); }
+  .divider-sub { font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.6; }
+  .divider-icon { font-size: 52px; margin-bottom: 20px; display: block; }
+
+  /* CONTENT */
+  .slide-content { background: linear-gradient(180deg, #0d2655 0%, #112d6b 100%); }
+  .slide-heading {
+    font-family: 'Montserrat', sans-serif; font-weight: 800;
+    font-size: 22px; color: white; line-height: 1.25; margin-bottom: 18px;
+  }
+  .slide-heading span { color: var(--gold); }
+
+  .card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px; padding: 16px; margin-bottom: 12px;
+  }
+  .card-white { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .card-gold {
+    background: linear-gradient(135deg, #C9A84C 0%, #e8c96a 100%);
+    border-radius: 16px; padding: 16px; margin-bottom: 12px;
+  }
+  .card-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 14px; color: white; margin-bottom: 8px; }
+  .card-white .card-title { color: var(--blue); }
+  .card-text { font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.55; }
+  .card-white .card-text { color: #333; }
+
+  /* MYTH */
+  .myth-grid { display: flex; flex-direction: column; gap: 10px; }
+  .myth-item {
+    background: rgba(255,255,255,0.07); border-radius: 12px;
+    padding: 13px 14px; display: flex; align-items: flex-start; gap: 10px;
+  }
+  .myth-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+  .myth-label { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 4px; }
+  .myth-item.bad .myth-label { color: var(--accent); }
+  .myth-item.good .myth-label { color: #4ade80; }
+  .myth-item .myth-text { font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.45; }
+
+  /* ERICKSON STAR */
+  .star-center {
+    background: linear-gradient(135deg, var(--gold), #d4a853);
+    border-radius: 16px; padding: 14px 16px; text-align: center;
+    margin-bottom: 12px;
+  }
+  .star-center-text {
+    font-family: 'Montserrat', sans-serif; font-weight: 800;
+    font-size: 15px; color: #0d2655; line-height: 1.3;
+  }
+  .star-rays { display: flex; flex-direction: column; gap: 8px; }
+  .star-ray {
+    background: rgba(255,255,255,0.07); border-radius: 12px;
+    padding: 10px 13px; display: flex; align-items: flex-start; gap: 10px;
+  }
+  .ray-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .ray-belief {
+    font-family: 'Montserrat', sans-serif; font-weight: 700;
+    font-size: 12px; color: var(--gold); margin-bottom: 3px;
+  }
+  .ray-meaning { font-size: 12px; color: rgba(255,255,255,0.75); line-height: 1.4; }
+
+  /* STATS */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .stat-card {
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 14px; padding: 14px 12px; text-align: center;
+  }
+  .stat-num { font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 34px; color: var(--gold); line-height: 1; margin-bottom: 6px; }
+  .stat-label { font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.35; }
+  .stat-card.highlight {
+    background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.08));
+    border-color: var(--gold);
+  }
+
+  /* TABLE */
+  .data-table { background: rgba(255,255,255,0.06); border-radius: 14px; overflow: hidden; margin-bottom: 12px; font-size: 12px; }
+  .table-row {
+    display: grid; grid-template-columns: 1.8fr 0.8fr 0.8fr;
+    padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.07);
+    gap: 6px; align-items: center;
+  }
+  .table-row.header {
+    background: rgba(201,168,76,0.15); font-weight: 700;
+    font-size: 10px; color: var(--gold); letter-spacing: 0.5px; text-transform: uppercase;
+  }
+  .table-row:last-child { border-bottom: none; }
+  .table-row .city { color: rgba(255,255,255,0.9); font-size: 11px; }
+  .table-row .val { color: white; font-weight: 600; text-align: center; }
+  .table-row .val-gold { color: var(--gold); font-weight: 700; text-align: center; }
+
+  /* SCRIPT BUBBLES */
+  .script-bubble {
+    background: white; border-radius: 18px 18px 18px 4px;
+    padding: 14px 16px; margin-bottom: 10px; position: relative;
+  }
+  .script-bubble::before { content: '💬'; position: absolute; top: -4px; left: -4px; font-size: 16px; }
+  .script-label { font-size: 10px; font-weight: 700; color: var(--blue); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .script-text { font-size: 14px; color: #1a1a1a; line-height: 1.55; font-style: italic; }
+
+  /* LIFEHACK */
+  .lh-list { display: flex; flex-direction: column; gap: 9px; }
+  .lh-item {
+    background: rgba(255,255,255,0.07); border-radius: 12px;
+    padding: 11px 13px; display: flex; align-items: flex-start; gap: 10px;
+  }
+  .lh-num { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; color: var(--gold); flex-shrink: 0; min-width: 22px; }
+  .lh-title { font-weight: 600; font-size: 13px; color: white; margin-bottom: 3px; }
+  .lh-desc { font-size: 12px; color: rgba(255,255,255,0.7); line-height: 1.4; }
+
+  /* CHAIN */
+  .chain-flow { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .chain-step {
+    background: rgba(255,255,255,0.08);
+    border-left: 4px solid var(--gold);
+    border-radius: 0 12px 12px 0; padding: 11px 13px;
+  }
+  .chain-step.gold-step { border-left-color: #e8c96a; background: rgba(201,168,76,0.12); }
+  .chain-step-num { font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 3px; }
+  .chain-step-text { font-size: 13px; color: white; line-height: 1.45; }
+  .chain-arrow { text-align: center; color: var(--gold); font-size: 18px; }
+
+  /* TECHNIQUE */
+  .technique-steps { display: flex; flex-direction: column; gap: 10px; }
+  .technique-step {
+    background: rgba(255,255,255,0.07); border-radius: 12px;
+    padding: 12px 14px; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .ts-icon { font-size: 22px; flex-shrink: 0; }
+  .ts-title { font-weight: 700; font-size: 13px; color: var(--gold); margin-bottom: 4px; }
+  .ts-text { font-size: 12px; color: rgba(255,255,255,0.8); line-height: 1.45; }
+
+  /* OBJECTIONS */
+  .objection-block { margin-bottom: 12px; }
+  .obj-question {
+    background: rgba(232,68,90,0.15); border-left: 3px solid var(--accent);
+    border-radius: 0 10px 10px 0; padding: 10px 12px;
+    font-size: 13px; color: #ffb3b3; font-style: italic; margin-bottom: 6px; line-height: 1.45;
+  }
+  .obj-answer {
+    background: rgba(255,255,255,0.08); border-left: 3px solid var(--green);
+    border-radius: 0 10px 10px 0; padding: 10px 12px;
+    font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.45;
+  }
+
+  /* PSYCHOTYPES */
+  .psycho-grid { display: flex; flex-direction: column; gap: 10px; }
+  .psycho-card {
+    background: rgba(255,255,255,0.07); border-radius: 14px; padding: 13px;
+    border-left: 4px solid transparent;
+  }
+  .psycho-card.fire { border-color: #ef4444; }
+  .psycho-card.air { border-color: #60a5fa; }
+  .psycho-card.water { border-color: #818cf8; }
+  .psycho-card.earth { border-color: #a3e635; }
+  .psycho-header { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .psycho-emoji { font-size: 20px; }
+  .psycho-name { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 13px; color: white; }
+  .psycho-trait { font-size: 11px; color: rgba(255,255,255,0.5); }
+  .psycho-script {
+    font-size: 12px; color: rgba(255,255,255,0.85); font-style: italic;
+    line-height: 1.45; background: rgba(0,0,0,0.2); padding: 8px 10px; border-radius: 8px;
+  }
+
+  /* CASE STUDY */
+  .case-flow { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+  .case-item {
+    background: white; border-radius: 12px; padding: 12px 14px;
+    position: relative; overflow: hidden;
+  }
+  .case-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--blue); }
+  .case-item.result::before { background: var(--green); }
+  .case-text { font-size: 13px; color: #1a1a1a; line-height: 1.5; }
+  .case-text .hl { background: #dbeafe; padding: 1px 4px; border-radius: 3px; color: var(--blue-dark); font-weight: 600; }
+  .case-text .hl-green { background: #dcfce7; padding: 1px 4px; border-radius: 3px; color: #15803d; font-weight: 600; }
+
+  /* QUIZ */
+  .quiz-question { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 17px; color: white; line-height: 1.35; margin-bottom: 18px; }
+  .quiz-options { display: flex; flex-direction: column; gap: 9px; }
+  .quiz-option {
+    background: rgba(255,255,255,0.09); border: 2px solid rgba(255,255,255,0.12);
+    border-radius: 12px; padding: 13px 14px; font-size: 14px;
+    color: rgba(255,255,255,0.9); cursor: pointer; transition: all 0.25s;
+    line-height: 1.4; display: flex; align-items: center; gap: 10px; text-align: left;
+  }
+  .quiz-option:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
+  .quiz-option.correct { background: rgba(39,174,96,0.2); border-color: var(--green); color: #4ade80; }
+  .quiz-option.wrong { background: rgba(232,68,90,0.15); border-color: var(--accent); color: #fca5a5; }
+  .quiz-option-letter { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; color: var(--gold); flex-shrink: 0; min-width: 20px; }
+  .quiz-result-text { margin-top: 14px; padding: 12px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; display: none; }
+  .quiz-result-text.show { display: block; }
+  .quiz-result-text.correct { background: rgba(39,174,96,0.15); color: #86efac; }
+  .quiz-result-text.wrong { background: rgba(232,68,90,0.12); color: #fca5a5; }
+  .quiz-nav { margin-top: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .quiz-btn {
+    background: var(--gold); color: #0d2655; border: none; border-radius: 22px;
+    padding: 10px 20px; font-family: 'Montserrat', sans-serif; font-weight: 700;
+    font-size: 13px; cursor: pointer; transition: all 0.2s;
+  }
+  .quiz-btn:hover { background: var(--gold-light); transform: translateY(-1px); }
+  .quiz-btn.secondary { background: transparent; color: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.2); }
+  .quiz-progress { font-size: 12px; color: rgba(255,255,255,0.4); margin-left: auto; }
+
+  /* FINAL */
+  .slide-final {
+    background: linear-gradient(160deg, #0d2655 0%, #1B4E9B 60%, #0d3580 100%);
+    justify-content: center;
+  }
+  .checklist { display: flex; flex-direction: column; gap: 9px; margin-bottom: 18px; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: rgba(255,255,255,0.07); border-radius: 12px; padding: 11px 13px;
+  }
+  .check-icon { font-size: 18px; flex-shrink: 0; }
+  .check-text { font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.4; }
+  .final-cta {
+    background: linear-gradient(135deg, var(--gold), #d4a853);
+    border-radius: 16px; padding: 18px; text-align: center; margin-top: 6px;
+  }
+  .final-cta-text { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 17px; color: #0d2655; line-height: 1.3; }
+
+  /* TABLET CARD */
+  .tablet-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .tablet-title { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 14px; color: var(--blue); margin-bottom: 10px; }
+  .tablet-items { display: flex; flex-direction: column; gap: 7px; }
+  .tablet-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; background: #f4f7fc; }
+  .tablet-item-icon { font-size: 18px; }
+  .tablet-item-text { font-size: 13px; color: #333; }
+  .tablet-item-price { margin-left: auto; font-weight: 700; font-size: 12px; color: var(--accent); background: #fff0f3; padding: 2px 8px; border-radius: 8px; }
+
+  /* INFO / WARNING */
+  .info-box {
+    background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;
+    font-size: 13px; color: var(--gold-light); line-height: 1.5;
+  }
+  .info-box strong { font-weight: 700; }
+  .warning-box {
+    background: rgba(232,68,90,0.12); border: 1px solid rgba(232,68,90,0.3);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 12px;
+    font-size: 13px; color: #ffb3b3; line-height: 1.5;
+  }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+
+  @media (max-width: 380px) {
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .cover-title { font-size: 30px; }
+    .divider-title { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="sokolov-logo">SOKOLOV</div>
+<div class="slide-counter" id="slideCounter">1 / 20</div>
+<div class="dot-nav" id="dotNav"></div>
+<div class="nav-arrows">
+  <button class="arrow-btn arrow-prev" id="prevBtn" onclick="navigate(-1)">←</button>
+  <button class="arrow-btn arrow-next" id="nextBtn" onclick="navigate(1)">→</button>
+</div>
+
+<div class="slides-wrapper" id="slidesWrapper">
+
+  <!-- SLIDE 1: COVER -->
+  <div class="slide slide-cover active" id="slide-0">
+    <div class="cover-tag">Обучение для продавцов</div>
+    <div class="cover-accent-line"></div>
+    <div class="cover-title">Кросс-промо:<br><span>Продажи без отговорок</span></div>
+    <div class="cover-sub">Как превратить каждого гостя с подвеской в довольного покупателя — даже если он пришёл с негативом</div>
+  </div>
+
+  <!-- SLIDE 2: PROGRAM -->
+  <div class="slide slide-content" id="slide-1">
+    <div class="section-label">Содержание</div>
+    <div class="slide-heading">Что тебя ждёт в этом обучении</div>
+    <div class="lh-list">
+      <div class="lh-item">
+        <div class="lh-num">01</div>
+        <div>
+          <div class="lh-title">Правильная установка</div>
+          <div class="lh-desc">Почему «плохих клиентов» не существует и установки Эриксона</div>
+        </div>
+      </div>
+      <div class="lh-item">
+        <div class="lh-num">02</div>
+        <div>
+          <div class="lh-title">Алгоритм продажи</div>
+          <div class="lh-desc">Подвеска → Украшения по специальной цене → Цепи и браслеты</div>
+        </div>
+      </div>
+      <div class="lh-item">
+        <div class="lh-num">03</div>
+        <div>
+          <div class="lh-title">Скрипты и фразы</div>
+          <div class="lh-desc">Готовые фразы: базовый, по психотипу, с негативом</div>
+        </div>
+      </div>
+      <div class="lh-item">
+        <div class="lh-num">04</div>
+        <div>
+          <div class="lh-title">Работа с негативом</div>
+          <div class="lh-desc">Технология присоединения: превращаем «недовольного» в лояльного</div>
+        </div>
+      </div>
+      <div class="lh-item">
+        <div class="lh-num">05</div>
+        <div>
+          <div class="lh-title">Проверь себя</div>
+          <div class="lh-desc">Тест и разбор реальных кейсов из практики</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 3: DIVIDER — Установка -->
+  <div class="slide slide-divider" id="slide-2">
+    <span class="divider-icon">🧠</span>
+    <div class="divider-num">01</div>
+    <div class="divider-title">Правильная<br><span>установка</span></div>
+    <div class="divider-sub">Что на самом деле думают сотрудники о гостях кросс-промо — и почему это мешает продавать</div>
+  </div>
+
+  <!-- SLIDE 4: MYTH + ERICKSON STAR -->
+  <div class="slide slide-content" id="slide-3">
+    <div class="section-label">Установки Эриксона</div>
+    <div class="slide-heading">Пять убеждений,<br><span>которые меняют всё</span></div>
+    <div class="star-center">
+      <div class="star-center-text">⭐ Нет плохих клиентов — есть неправильный подход</div>
+    </div>
+    <div class="star-rays">
+      <div class="star-ray">
+        <span class="ray-icon">🎯</span>
+        <div>
+          <div class="ray-belief">За каждым поведением стоит позитивное намерение</div>
+          <div class="ray-meaning">Грубый гость не злой — он устал, боится или защищается. Найди намерение — найдёшь контакт</div>
+        </div>
+      </div>
+      <div class="star-ray">
+        <span class="ray-icon">💡</span>
+        <div>
+          <div class="ray-belief">Человек всегда делает лучший выбор из доступных ему</div>
+          <div class="ray-meaning">«Халявщик» — человек, нашедший выгодную возможность. Умный! Покажи ему ещё более выгодную</div>
+        </div>
+      </div>
+      <div class="star-ray">
+        <span class="ray-icon">🔄</span>
+        <div>
+          <div class="ray-belief">Нет неудачи — есть обратная связь</div>
+          <div class="ray-meaning">Клиент не купил? Я получил информацию для следующего раза. Каждый отказ — урок, а не провал</div>
+        </div>
+      </div>
+      <div class="star-ray">
+        <span class="ray-icon">📡</span>
+        <div>
+          <div class="ray-belief">Смысл коммуникации — в реакции, которую она вызывает</div>
+          <div class="ray-meaning">Если клиент реагирует негативно — не клиент «сложный», я меняю подход. Реакция — мой индикатор</div>
+        </div>
+      </div>
+      <div class="star-ray">
+        <span class="ray-icon">🗝️</span>
+        <div>
+          <div class="ray-belief">У каждого есть все ресурсы для изменения</div>
+          <div class="ray-meaning">Любой «трудный» гость может стать лояльным покупателем. Нужно лишь найти правильный ключ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: STATS -->
+  <div class="slide slide-content" id="slide-4">
+    <div class="section-label">Цифры</div>
+    <div class="slide-heading">Почему кросс-промо —<br><span>это серьёзно</span></div>
+    <div class="stats-grid">
+      <div class="stat-card highlight">
+        <div class="stat-num">30%</div>
+        <div class="stat-label">Минимальная конверсия в лучших магазинах</div>
+      </div>
+      <div class="stat-card highlight">
+        <div class="stat-num">50%+</div>
+        <div class="stat-label">Конверсия в топ-магазинах в день выдачи</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">5 000₽</div>
+        <div class="stat-label">Минимальный средний чек кросс-промо гостя</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">14 000₽</div>
+        <div class="stat-label">Средний чек в лучших магазинах</div>
+      </div>
+    </div>
+    <div class="stat-card highlight" style="margin-bottom:10px">
+      <div class="stat-num">35%</div>
+      <div class="stat-label">Новых клиентов 2024 года пришли через кросс-промо — каждый третий!</div>
+    </div>
+    <div class="info-box">Кросс-промо даёт магазину от <strong>15% до 58% оборота</strong>. Это не мелочь — это главный источник нового трафика.</div>
+  </div>
+
+  <!-- SLIDE 6: TABLE -->
+  <div class="slide slide-content" id="slide-5">
+    <div class="section-label">Результаты магазинов</div>
+    <div class="slide-heading">Реальные магазины,<br><span>реальные результаты</span></div>
+    <div class="data-table">
+      <div class="table-row header">
+        <div>Магазин</div>
+        <div style="text-align:center">Конв.</div>
+        <div style="text-align:center">Ср. чек</div>
+      </div>
+      <div class="table-row">
+        <div class="city">Уфа, ТЦ Акварин</div>
+        <div class="val-gold">34%</div>
+        <div class="val">8 470₽</div>
+      </div>
+      <div class="table-row">
+        <div class="city">Калининград, ТЦ Эпицентр</div>
+        <div class="val-gold">19%</div>
+        <div class="val">6 545₽</div>
+      </div>
+      <div class="table-row">
+        <div class="city">Новоуральск, ТЦ Кедр</div>
+        <div class="val-gold">31%</div>
+        <div class="val">6 468₽</div>
+      </div>
+      <div class="table-row">
+        <div class="city">Пермь, ТЦ Эспланада</div>
+        <div class="val-gold">29%</div>
+        <div class="val">6 006₽</div>
+      </div>
+      <div class="table-row">
+        <div class="city">Ростов-на-Дону, ТЦ РИО</div>
+        <div class="val-gold">30%</div>
+        <div class="val">6 006₽</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-text">Продав <strong style="color:var(--gold)">10 украшений или цепей за смену</strong> — ты зарабатываешь для магазина более <strong style="color:var(--gold)">10 000 ₽</strong> дополнительно в месяц! 💰</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: DIVIDER — Алгоритм -->
+  <div class="slide slide-divider" id="slide-6">
+    <span class="divider-icon">📱</span>
+    <div class="divider-num">02</div>
+    <div class="divider-title">Открытый планшет:<br><span>Алгоритм продажи</span></div>
+    <div class="divider-sub">Начинаем с дорогого — украшения по специальной цене, потом цепи и браслеты</div>
+  </div>
+
+  <!-- SLIDE 8: TABLET + ALGORITHM -->
+  <div class="slide slide-content" id="slide-7">
+    <div class="section-label">Правильный порядок</div>
+    <div class="slide-heading">Алгоритм кросс-промо<br><span>продажи</span></div>
+    <div class="chain-flow">
+      <div class="chain-step">
+        <div class="chain-step-num">ШАГ 1</div>
+        <div class="chain-step-text">🎁 Регистрируем в боте → выдаём подвеску с улыбкой и комплиментом</div>
+      </div>
+      <div class="chain-arrow">↓</div>
+      <div class="chain-step gold-step">
+        <div class="chain-step-num" style="color:#e8c96a">ШАГ 2 — ПРИОРИТЕТ</div>
+        <div class="chain-step-text">💛 Украшения из золота по специальной цене — показываем первыми, пока гость у кассы</div>
+      </div>
+      <div class="chain-arrow">↓</div>
+      <div class="chain-step">
+        <div class="chain-step-num">ШАГ 3</div>
+        <div class="chain-step-text">📿 Цепь или браслет к подвеске в комплект</div>
+      </div>
+      <div class="chain-arrow">↓</div>
+      <div class="chain-step">
+        <div class="chain-step-num">ШАГ 4</div>
+        <div class="chain-step-text">🧴 Чистящее средство для ухода за украшениями</div>
+      </div>
+    </div>
+    <div class="info-box"><strong>Логика:</strong> Всегда начинаем с более дорогого предложения. Украшения по специальной цене — главный приоритет, цепи — следующий шаг.</div>
+    <div class="tablet-card">
+      <div class="tablet-title">📦 Открытый планшет у кассы:</div>
+      <div class="tablet-items">
+        <div class="tablet-item">
+          <span class="tablet-item-icon">💛</span>
+          <span class="tablet-item-text">Золотые украшения по специальной цене</span>
+          <span class="tablet-item-price">Спец. цена</span>
+        </div>
+        <div class="tablet-item">
+          <span class="tablet-item-icon">📿</span>
+          <span class="tablet-item-text">Цепи — разные плетения и длины</span>
+        </div>
+        <div class="tablet-item">
+          <span class="tablet-item-icon">💎</span>
+          <span class="tablet-item-text">Браслеты</span>
+        </div>
+        <div class="tablet-item">
+          <span class="tablet-item-icon">🧴</span>
+          <span class="tablet-item-text">Чистящие средства для украшений</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: SCRIPTS -->
+  <div class="slide slide-content" id="slide-8">
+    <div class="section-label">Скрипты продажи</div>
+    <div class="slide-heading">Что говорим:<br><span>от дорогого к простому</span></div>
+    <div class="script-bubble">
+      <div class="script-label">1. Специальная цена — говорим ПЕРВЫМ</div>
+      <div class="script-text">«Пока оформляем вашу подвеску — обратите внимание: специально для гостей нашей акции у нас есть украшения из золота по цене значительно ниже обычной. Такие предложения бывают редко — разбирают очень быстро, завтра может уже не оказаться. Вот, посмотрите 😊»</div>
+    </div>
+    <div class="script-bubble">
+      <div class="script-label">2. Цепь или браслет к комплекту</div>
+      <div class="script-text">«И ещё — ваша подвеска будет выглядеть намного красивее с цепью или браслетом в комплекте. Какую длину предпочитаете: 40, 45 или 50 см? С учётом всех скидок и бонусов — выгодно получается»</div>
+    </div>
+    <div class="info-box"><strong>Выбор без выбора:</strong> «Какое украшение вам нравится больше — вот это или вот это?» Не «Вам что-нибудь нужно?», а сразу показываем и предлагаем выбрать между вариантами.</div>
+    <div class="lh-list">
+      <div class="lh-item">
+        <div class="lh-num">💡</div>
+        <div>
+          <div class="lh-title">Демонстрируй на себе</div>
+          <div class="lh-desc">Надень украшение — гости охотнее покупают то, что видят на продавце</div>
+        </div>
+      </div>
+      <div class="lh-item">
+        <div class="lh-num">👋</div>
+        <div>
+          <div class="lh-title">Дай примерить</div>
+          <div class="lh-desc">Гости лучше запоминают то, что потрогали и примерили сами</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: MORE LIFEHACKS -->
+  <div class="slide slide-content" id="slide-9">
+    <div class="section-label">Лайфхаки при работе с гостем</div>
+    <div class="slide-heading">Приёмы, которые<br><span>работают</span></div>
+    <div class="lh-list">
+      <div class="lh-item">
+        <div class="lh-num">🗂️</div>
+        <div>
+          <div class="lh-title">Создавай комплекты заранее</div>
+          <div class="lh-desc">Выложи готовые сочетания на витрине в подарочной коробке — визуальное восприятие помогает принять решение</div>
+        </div>
+      </div>
+      <div class="lh-item">
+        <div class="lh-num">🔗</div>
+        <div>
+          <div class="lh-title">Сочетай между собой</div>
+          <div class="lh-desc">Надень браслет с цепью или собери несколько браслетов вместе — покажи готовый образ</div>
+        </div>
+      </div>
+      <div class="lh-item">
+        <div class="lh-num">⚖️</div>
+        <div>
+          <div class="lh-title">Сравнивай плетения</div>
+          <div class="lh-desc">«Вот "Нонна" — невесомое, а "Ромб" — брутальное. Какое вам ближе?» — это вовлекает гостя в диалог</div>
+        </div>
+      </div>
+      <div class="lh-item">
+        <div class="lh-num">🎁</div>
+        <div>
+          <div class="lh-title">Акцент на подарке</div>
+          <div class="lh-desc">«Украшение с позолотой станет отличным подарком для близких. Упакуем в подарочную коробку?»</div>
+        </div>
+      </div>
+      <div class="lh-item">
+        <div class="lh-num">📣</div>
+        <div>
+          <div class="lh-title">Расскажи об акциях</div>
+          <div class="lh-desc">При выдаче подарка сообщи о текущих акциях, trade-in, Surprise Box и пригласи посмотреть зал</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: DIVIDER — Негатив -->
+  <div class="slide slide-divider" id="slide-10">
+    <span class="divider-icon">😤</span>
+    <div class="divider-num">03</div>
+    <div class="divider-title">Гость с негативом:<br><span>Как расположить</span></div>
+    <div class="divider-sub">Раздражение — это не атака. Это сигнал, что человеку нужна помощь</div>
+  </div>
+
+  <!-- SLIDE 12: WHY NEGATIVITY -->
+  <div class="slide slide-content" id="slide-11">
+    <div class="section-label">Понимаем причины</div>
+    <div class="slide-heading">Откуда берётся<br><span>негатив гостя?</span></div>
+    <div class="myth-grid">
+      <div class="myth-item" style="background:rgba(255,255,255,0.06)">
+        <div class="myth-icon">⏰</div>
+        <div>
+          <div class="myth-label" style="color:rgba(255,255,255,0.5)">Причина</div>
+          <div class="myth-text">Долго ждал, пока его обслужат</div>
+        </div>
+      </div>
+      <div class="myth-item" style="background:rgba(255,255,255,0.06)">
+        <div class="myth-icon">🤔</div>
+        <div>
+          <div class="myth-label" style="color:rgba(255,255,255,0.5)">Причина</div>
+          <div class="myth-text">Не понял условия акции, боится, что его обманут</div>
+        </div>
+      </div>
+      <div class="myth-item" style="background:rgba(255,255,255,0.06)">
+        <div class="myth-icon">😞</div>
+        <div>
+          <div class="myth-label" style="color:rgba(255,255,255,0.5)">Причина</div>
+          <div class="myth-text">Плохое настроение по другим причинам</div>
+        </div>
+      </div>
+      <div class="myth-item" style="background:rgba(255,255,255,0.06)">
+        <div class="myth-icon">😰</div>
+        <div>
+          <div class="myth-label" style="color:rgba(255,255,255,0.5)">Причина</div>
+          <div class="myth-text">Стесняется, что «пришёл за подарком» — защищается агрессией</div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:4px">
+      <div class="card-title">💡 Ключевой вывод</div>
+      <div class="card-text">Негативный гость — это <strong style="color:var(--gold)">потенциально самый лояльный клиент</strong>, если ты помог ему в трудный момент. Один искренний жест — и он вернётся снова.</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 13: JOINING TECHNIQUE -->
+  <div class="slide slide-content" id="slide-12">
+    <div class="section-label">Технология присоединения</div>
+    <div class="slide-heading">Как работать<br><span>с негативом: 4 шага</span></div>
+    <div class="technique-steps">
+      <div class="technique-step">
+        <div class="ts-icon">👂</div>
+        <div>
+          <div class="ts-title">1. Выслушай, не перебивая</div>
+          <div class="ts-text">Дай гостю высказаться. Молчи и слушай. Это снижает напряжение само по себе.</div>
+        </div>
+      </div>
+      <div class="technique-step">
+        <div class="ts-icon">🤝</div>
+        <div>
+          <div class="ts-title">2. Присоединись к чувствам</div>
+          <div class="ts-text">«Понимаю» / «Да, это важно» — не спорь, не оправдывайся, не заискивай. Ты на его стороне.</div>
+        </div>
+      </div>
+      <div class="technique-step">
+        <div class="ts-icon">💬</div>
+        <div>
+          <div class="ts-title">3. Уточни ситуацию</div>
+          <div class="ts-text">«Расскажите, что случилось?» / «Как я могу помочь?» — переключи на решение.</div>
+        </div>
+      </div>
+      <div class="technique-step">
+        <div class="ts-icon">🎯</div>
+        <div>
+          <div class="ts-title">4. Предложи решение + ценность</div>
+          <div class="ts-text">Выдай подвеску с достоинством, покажи специальные предложения — это лучший способ восстановить лояльность.</div>
+        </div>
+      </div>
+    </div>
+    <div class="warning-box">❗ Никогда не спорь, не отвечай раздражением. Но и не заискивай — держи спину прямо. Искреннее достоинство и забота действуют лучше извинений.</div>
+  </div>
+
+  <!-- SLIDE 14: OBJECTION HANDLING -->
+  <div class="slide slide-content" id="slide-13">
+    <div class="section-label">Готовые фразы</div>
+    <div class="slide-heading">Сложные ситуации:<br><span>что говорить</span></div>
+    <div class="objection-block">
+      <div class="obj-question">😠 «Я не буду регистрироваться, просто дайте подвеску!»</div>
+      <div class="obj-answer">«Мы очень хотим вам подарить подвеску — это для нас важно! Именно поэтому нужна регистрация: это официальное условие акции, без неё мы просто не сможем оформить подарок. Давайте я помогу — это займёт буквально минуту 😊»</div>
+    </div>
+    <div class="objection-block">
+      <div class="obj-question">😒 «Я знаю, что вы хотите мне что-то продать»</div>
+      <div class="obj-answer">«Понимаю вас 😊 Просто у нас сейчас есть украшения по цене ниже обычной стоимости — такое бывает очень редко. Я искренне хочу, чтобы вы не упустили эту возможность. Решение, конечно, за вами — просто посмотрите одним глазком»</div>
+    </div>
+    <div class="objection-block">
+      <div class="obj-question">😤 «Долго жду! Безобразие!»</div>
+      <div class="obj-answer">«Сегодня много гостей с нашей акцией — приятно, что SOKOLOV выбирают так активно. Занимаюсь вами прямо сейчас. [Оформляет.] Кстати, пока делаем — у нас сейчас украшения по специальной цене, которые очень быстро разбирают. Взгляните?»</div>
+    </div>
+    <div class="objection-block">
+      <div class="obj-question">😑 «Мне ничего не нужно, только подвеска»</div>
+      <div class="obj-answer">«Конечно! Оформляем. Просто пока готовим подарок — хочу показать вам кое-что интересное: у нас сейчас украшения по цене ниже себестоимости, специально для гостей акции. Такое предложение бывает редко — взгляните одним глазком 😊»</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 15: DIVIDER — Psychotypes -->
+  <div class="slide slide-divider" id="slide-14">
+    <span class="divider-icon">🎭</span>
+    <div class="divider-num">04</div>
+    <div class="divider-title">Скрипты по<br><span>психотипам</span></div>
+    <div class="divider-sub">У каждого гостя свой характер — подбери правильный ключ</div>
+  </div>
+
+  <!-- SLIDE 16: PSYCHOTYPES -->
+  <div class="slide slide-content" id="slide-15">
+    <div class="section-label">4 типа гостей</div>
+    <div class="slide-heading">Найди свой подход<br><span>к каждому</span></div>
+    <div class="psycho-grid">
+      <div class="psycho-card fire">
+        <div class="psycho-header">
+          <span class="psycho-emoji">🔥</span>
+          <div>
+            <div class="psycho-name">Огонь — Лидер</div>
+            <div class="psycho-trait">Решительный, любит статус, ценит время</div>
+          </div>
+        </div>
+        <div class="psycho-script">«Это из нашей новой коллекции — редкая позиция, таких немного. Выглядит очень достойно. Берём?»</div>
+      </div>
+      <div class="psycho-card air">
+        <div class="psycho-header">
+          <span class="psycho-emoji">💨</span>
+          <div>
+            <div class="psycho-name">Воздух — Тусовщик</div>
+            <div class="psycho-trait">Общительный, любит тренды и одобрение</div>
+          </div>
+        </div>
+        <div class="psycho-script">«Это сейчас очень популярное украшение — на него большой спрос, и цена выгодная. Давайте примерим — на вас точно будет хорошо смотреться?»</div>
+      </div>
+      <div class="psycho-card water">
+        <div class="psycho-header">
+          <span class="psycho-emoji">💧</span>
+          <div>
+            <div class="psycho-name">Вода — Гармонист</div>
+            <div class="psycho-trait">Мягкий, важны отношения и забота о близких</div>
+          </div>
+        </div>
+        <div class="psycho-script">«Это украшение станет чудесным подарком для кого-то близкого — или просто порадует вас. По такой цене это особенно приятно. Упакуем красиво?»</div>
+      </div>
+      <div class="psycho-card earth">
+        <div class="psycho-header">
+          <span class="psycho-emoji">🌍</span>
+          <div>
+            <div class="psycho-name">Земля — Аналитик</div>
+            <div class="psycho-trait">Осторожный, любит факты и выгоду</div>
+          </div>
+        </div>
+        <div class="psycho-script">«Золото 585 пробы, качественное изготовление — носится годами. Цена по нашей акции ниже обычной стоимости — это объективно выгодное предложение»</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 17: SPECIAL PRICE SCRIPTS -->
+  <div class="slide slide-content" id="slide-16">
+    <div class="section-label">Специальная цена</div>
+    <div class="slide-heading">Как рассказать<br><span>об украшении выгодно</span></div>
+    <div class="script-bubble">
+      <div class="script-label">Универсальный скрипт</div>
+      <div class="script-text">«Пока оформляем — посмотрите, пожалуйста, на наш планшет. Это украшения по специальной цене — значительно ниже обычной стоимости. Вот, например [показывает] — что думаете?»</div>
+    </div>
+    <div class="script-bubble">
+      <div class="script-label">Если гость заинтересовался</div>
+      <div class="script-text">«Отличный выбор! Это золото 585 пробы [или серебро 925]. С вашими бонусами выходит [сумма]. Оформляем вместе с подвеской?»</div>
+    </div>
+    <div class="script-bubble">
+      <div class="script-label">Если гость сомневается</div>
+      <div class="script-text">«Подумайте — я не тороплю. Только имейте в виду: такие предложения заканчиваются быстро. У нас уже несколько позиций разобрали за пару дней — завтра может не оказаться»</div>
+    </div>
+    <div class="info-box"><strong>Реальный кейс:</strong> В одном из магазинов сфокусировали внимание всех гостей кросс-промо на украшениях по специальной цене — все серьги были проданы за 2 дня! 🎉</div>
+  </div>
+
+  <!-- SLIDE 18: PRACTICE CASE -->
+  <div class="slide slide-content" id="slide-17">
+    <div class="section-label">Алгоритм на практике</div>
+    <div class="slide-heading"><span>Что делаем</span><br>с каждым гостем</div>
+    <div class="chain-flow">
+      <div class="chain-step">
+        <div class="chain-step-num">ШАГ 1</div>
+        <div class="chain-step-text">📱 Регистрируем в боте — это обязательное условие для оформления подарка</div>
+      </div>
+      <div class="chain-arrow">↓</div>
+      <div class="chain-step">
+        <div class="chain-step-text">🎁 Выдаём подвеску с улыбкой и комплиментом гостю</div>
+      </div>
+      <div class="chain-arrow">↓</div>
+      <div class="chain-step gold-step">
+        <div class="chain-step-num" style="color:#e8c96a">ШАГ 3 — ГЛАВНОЕ</div>
+        <div class="chain-step-text">💛 Показываем специальные предложения и акции — украшения по специальной цене</div>
+      </div>
+      <div class="chain-arrow">↓</div>
+      <div class="chain-step">
+        <div class="chain-step-text">📿 Предлагаем цепь или браслет к подвеске в комплект</div>
+      </div>
+    </div>
+    <div class="case-flow">
+      <div class="case-item result">
+        <div class="case-text"><span class="hl-green">Реальный кейс:</span> В кассовой зоне разместили украшения по специальной цене и акцентировали внимание каждого гостя кросс-промо — <span class="hl-green">все серьги проданы за два дня!</span></div>
+      </div>
+    </div>
+    <div class="card-gold">
+      <div class="card-title" style="color:#0d2655">Главный принцип</div>
+      <div class="card-text" style="color:#0d2655">Каждый гость кросс-промо — <strong>уже готовый покупатель</strong> у кассы. Это лучший момент для предложения. Используй его!</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 19: QUIZ -->
+  <div class="slide slide-content" id="slide-18">
+    <div class="section-label">Проверь себя</div>
+    <div id="quizContainer"></div>
+  </div>
+
+  <!-- SLIDE 20: FINAL -->
+  <div class="slide slide-final" id="slide-19">
+    <div class="section-label">Памятка продавца</div>
+    <div class="slide-heading">Кросс-промо:<br><span>твоя шпаргалка</span></div>
+    <div class="checklist">
+      <div class="check-item">
+        <span class="check-icon">🧠</span>
+        <div class="check-text"><strong>Установка:</strong> Нет «халявщиков» — есть новые клиенты, которых привёл партнёр. За каждым поведением стоит позитивное намерение</div>
+      </div>
+      <div class="check-item">
+        <span class="check-icon">🤝</span>
+        <div class="check-text"><strong>Встречай с достоинством:</strong> Улыбка, зрительный контакт, спокойный тон — без заискиваний и без грубости</div>
+      </div>
+      <div class="check-item">
+        <span class="check-icon">💛</span>
+        <div class="check-text"><strong>Сначала — специальная цена:</strong> «Обратите внимание — украшения по цене ниже обычной. Такое бывает редко»</div>
+      </div>
+      <div class="check-item">
+        <span class="check-icon">📿</span>
+        <div class="check-text"><strong>Потом — цепь к комплекту:</strong> «Давайте подберём цепь — так подвеска выглядит завершённой!»</div>
+      </div>
+      <div class="check-item">
+        <span class="check-icon">👂</span>
+        <div class="check-text"><strong>С негативом — присоединяйся:</strong> Выслушай → «Понимаю» → помоги → покажи ценность</div>
+      </div>
+      <div class="check-item">
+        <span class="check-icon">📱</span>
+        <div class="check-text"><strong>Регистрируй всех</strong> в боте — это обязательное условие для оформления подарка</div>
+      </div>
+    </div>
+    <div class="final-cta">
+      <div class="final-cta-text">Попробуй применить сегодня —<br>и посмотри, как вырастут продажи! 🚀</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const quizQuestions = [
+  {
+    q: "В каком порядке правильно делать предложения гостю кросс-промо?",
+    options: [
+      "Подвеска → Цепь → Украшения по специальной цене",
+      "Подвеска → Украшения по специальной цене → Цепь/браслет",
+      "Сначала спросить что нужно, потом предлагать",
+      "Подвеска → Чистящее средство → Цепь"
+    ],
+    correct: 1,
+    explanation: "Правильно! Сначала показываем украшения по специальной цене — они дороже и важнее по приоритету. Цепи и браслеты предлагаем следующим шагом."
+  },
+  {
+    q: "Гость говорит: «Я не буду регистрироваться, просто дайте подвеску». Что отвечаешь?",
+    options: [
+      "«Без регистрации мы не можем выдать подарок по правилам»",
+      "«Мы очень хотим подарить подвеску — именно поэтому нужна регистрация, без неё не сможем оформить. Давайте я помогу, это займёт минуту»",
+      "«Хорошо, сделаем исключение»",
+      "Молча оформить без регистрации"
+    ],
+    correct: 1,
+    explanation: "Верно! Используем присоединение: выражаем желание подарить, объясняем причину и сразу предлагаем помощь. Не «не могу», а «помогу»."
+  },
+  {
+    q: "Гость говорит «Долго жду! Безобразие!» Что отвечаешь?",
+    options: [
+      "«Простите нас, это недопустимо, я очень извиняюсь»",
+      "«Это не моя вина, так сложилось»",
+      "«Сегодня много гостей с нашей акцией — занимаюсь вами прямо сейчас» и сразу к делу",
+      "Молча ускориться"
+    ],
+    correct: 2,
+    explanation: "Верно! Нейтральное присоединение без извинений и заискиваний — ты сохраняешь достоинство и искренне переключаешь на действие. Объяснение (много гостей) снимает напряжение."
+  },
+  {
+    q: "Гость «Земля» (аналитик) смотрит на украшение и молчит. Какой аргумент сработает?",
+    options: [
+      "«Это очень популярно, все берут»",
+      "«Золото 585 пробы, цена ниже обычной стоимости — выгодное предложение»",
+      "«Возьмите — не пожалеете, красиво»",
+      "«Это ограниченная коллекция»"
+    ],
+    correct: 1,
+    explanation: "Верно! Аналитику важны конкретные факты: проба металла, объективная выгода. Никаких эмоциональных слов — только цифры и конкретика."
+  },
+  {
+    q: "Согласно установкам Эриксона, что означает фраза «Нет неудачи — есть обратная связь»?",
+    options: [
+      "Нужно избегать ошибок любой ценой",
+      "Если клиент не купил — я получил информацию для следующего раза, каждый отказ — урок",
+      "Нужно всегда переспрашивать клиента",
+      "Обратная связь важнее продажи"
+    ],
+    correct: 1,
+    explanation: "Верно! Это ключевая установка: не «я провалился», а «я узнал что-то важное». Это снижает страх отказа и делает тебя лучше с каждым гостем."
+  }
+];
+
+let currentQ = 0, score = 0, answered = false;
+
+function renderQuiz() {
+  const c = document.getElementById('quizContainer');
+  const q = quizQuestions[currentQ];
+  const letters = ['А', 'Б', 'В', 'Г'];
+  c.innerHTML = `
+    <div class="quiz-question">${q.q}</div>
+    <div class="quiz-options">${q.options.map((o, i) => `
+      <div class="quiz-option" id="opt-${i}" onclick="selectAnswer(${i})">
+        <span class="quiz-option-letter">${letters[i]}</span><span>${o}</span>
+      </div>`).join('')}</div>
+    <div class="quiz-result-text" id="quizResult"></div>
+    <div class="quiz-nav">
+      <button class="quiz-btn" id="nextQBtn" onclick="nextQuestion()" style="display:none">
+        ${currentQ < quizQuestions.length - 1 ? 'Следующий вопрос →' : 'Результат'}
+      </button>
+      <div class="quiz-progress">Вопрос ${currentQ + 1} из ${quizQuestions.length}</div>
+    </div>`;
+  answered = false;
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = quizQuestions[currentQ];
+  document.querySelectorAll('.quiz-option').forEach((o, i) => {
+    if (i === q.correct) o.classList.add('correct');
+    else if (i === idx) o.classList.add('wrong');
+  });
+  const r = document.getElementById('quizResult');
+  if (idx === q.correct) { score++; r.className = 'quiz-result-text show correct'; r.innerHTML = '✅ ' + q.explanation; }
+  else { r.className = 'quiz-result-text show wrong'; r.innerHTML = '❌ ' + q.explanation; }
+  document.getElementById('nextQBtn').style.display = 'block';
+}
+
+function nextQuestion() {
+  if (currentQ < quizQuestions.length - 1) { currentQ++; renderQuiz(); }
+  else { showFinalScore(); }
+}
+
+function showFinalScore() {
+  const pct = Math.round((score / quizQuestions.length) * 100);
+  const emoji = pct >= 80 ? '🏆' : pct >= 60 ? '👍' : '📚';
+  const msg = pct >= 80 ? 'Отлично! Ты готов работать с кросс-промо гостями как профи.'
+    : pct >= 60 ? 'Хорошо! Повтори сложные моменты и применяй на практике.'
+    : 'Изучи материал ещё раз — практика сделает тебя мастером!';
+  document.getElementById('quizContainer').innerHTML = `
+    <div style="text-align:center;padding:10px 0">
+      <div style="font-size:64px;margin-bottom:12px">${emoji}</div>
+      <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:48px;color:var(--gold);margin-bottom:6px">${pct}%</div>
+      <div style="font-size:14px;color:rgba(255,255,255,0.6);margin-bottom:16px">${score} из ${quizQuestions.length} правильных ответов</div>
+      <div style="font-size:15px;color:white;line-height:1.5;margin-bottom:20px">${msg}</div>
+      <button class="quiz-btn" onclick="restartQuiz()">Пройти ещё раз</button>
+    </div>`;
+}
+
+function restartQuiz() { currentQ = 0; score = 0; renderQuiz(); }
+
+const totalSlides = 20;
+let current = 0;
+
+function updateUI() {
+  document.getElementById('progressBar').style.width = ((current + 1) / totalSlides * 100) + '%';
+  document.getElementById('slideCounter').textContent = (current + 1) + ' / ' + totalSlides;
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === current));
+  document.getElementById('prevBtn').disabled = current === 0;
+  document.getElementById('nextBtn').disabled = current === totalSlides - 1;
+}
+
+function goTo(n) {
+  if (n < 0 || n >= totalSlides) return;
+  document.querySelectorAll('.slide').forEach(s => { s.classList.remove('active'); s.classList.remove('exit'); });
+  current = n;
+  document.querySelectorAll('.slide')[current].classList.add('active');
+  updateUI();
+  if (current === 18) renderQuiz();
+}
+
+function navigate(dir) { goTo(current + dir); }
+
+function buildDots() {
+  const nav = document.getElementById('dotNav');
+  for (let i = 0; i < totalSlides; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goTo(i);
+    nav.appendChild(d);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') navigate(-1);
+});
+
+let tx = 0, ty = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx, dy = e.changedTouches[0].clientY - ty;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) navigate(dx < 0 ? 1 : -1);
+}, { passive: true });
+
+buildDots();
+updateUI();
+</script>
+</body>
+</html>
